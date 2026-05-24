@@ -86,6 +86,8 @@
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-os": "^2.3.2",
     "@types/three": "^0.183.1",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
     "buffer": "^6.0.3",
     "cmdk": "^1.1.1",
     "debug": "^4.4.3",

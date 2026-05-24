@@ -104,6 +104,7 @@ fn catalog_includes_additional_user_facing_surfaces() {
         "intelligence.searxng_search",
         "intelligence.tool_registry",
         "conversation.subagent_mascots",
+        "settings.interactive_terminal",
     ] {
         assert!(
             ids.contains(expected),

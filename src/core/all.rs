@@ -233,6 +233,8 @@ fn build_registered_controllers() -> Vec<RegisteredController> {
     controllers.extend(crate::openhuman::threads::all_threads_registered_controllers());
     // Per-thread todo list (agent task board CRUD over RPC)
     controllers.extend(crate::openhuman::todos::all_todos_registered_controllers());
+    // Interactive PTY terminal sessions for local shells and SSH.
+    controllers.extend(crate::openhuman::terminal::all_terminal_registered_controllers());
     // Embedded webview native notifications
     controllers.extend(
         crate::openhuman::webview_notifications::all_webview_notifications_registered_controllers(),
@@ -338,6 +340,8 @@ fn build_declared_controller_schemas() -> Vec<ControllerSchema> {
     schemas.extend(crate::openhuman::threads::all_threads_controller_schemas());
     // Per-thread todo list (agent task board CRUD over RPC)
     schemas.extend(crate::openhuman::todos::all_todos_controller_schemas());
+    // Interactive PTY terminal sessions for local shells and SSH.
+    schemas.extend(crate::openhuman::terminal::all_terminal_controller_schemas());
     // Embedded webview native notifications
     schemas.extend(
         crate::openhuman::webview_notifications::all_webview_notifications_controller_schemas(),
@@ -424,6 +428,7 @@ pub fn namespace_description(namespace: &str) -> Option<&'static str> {
         "referral" => Some("Referral codes, stats, and apply flows via the hosted backend API."),
         "billing" => Some("Subscription plan, payment links, and credit top-up via the backend."),
         "team" => Some("Team member management, invites, and role changes via the backend."),
+        "terminal" => Some("Interactive PTY terminal sessions for local shells and SSH."),
         "tool_registry" => Some(
             "Read-only discovery for MCP stdio tools and controller-backed tools, including routes, schemas, version, allowed agents, and health.",
         ),

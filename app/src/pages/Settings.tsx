@@ -34,6 +34,7 @@ import TeamInvitesPanel from '../components/settings/panels/TeamInvitesPanel';
 import TeamManagementPanel from '../components/settings/panels/TeamManagementPanel';
 import TeamMembersPanel from '../components/settings/panels/TeamMembersPanel';
 import TeamPanel from '../components/settings/panels/TeamPanel';
+import TerminalPanel from '../components/settings/panels/TerminalPanel';
 import ToolsPanel from '../components/settings/panels/ToolsPanel';
 import VoiceDebugPanel from '../components/settings/panels/VoiceDebugPanel';
 import VoicePanel from '../components/settings/panels/VoicePanel';
@@ -436,6 +437,10 @@ const Settings = () => {
         <Route path="voice-debug" element={wrapSettingsPage(<VoiceDebugPanel />)} />
         <Route path="local-model-debug" element={wrapSettingsPage(<LocalModelDebugPanel />)} />
         <Route path="webhooks-debug" element={wrapSettingsPage(<WebhooksDebugPanel />)} />
+        <Route
+          path="terminal"
+          element={wrapSettingsPage(<TerminalPanel />, { maxWidthClass: 'max-w-5xl' })}
+        />
         <Route path="memory-data" element={wrapSettingsPage(<MemoryDataPanel />)} />
         <Route path="memory-debug" element={wrapSettingsPage(<MemoryDebugPanel />)} />
         <Route path="intelligence" element={<Intelligence />} />

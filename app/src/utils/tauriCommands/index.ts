@@ -21,3 +21,4 @@ export * from './autocomplete';
 export * from './voice';
 export * from './aboutApp';
 export * from './workspacePaths';
+export * from './terminal';

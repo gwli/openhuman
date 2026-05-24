@@ -77,6 +77,7 @@ pub mod subconscious;
 pub mod team;
 #[cfg(feature = "e2e-test-support")]
 pub mod test_support;
+pub mod terminal;
 pub mod text_input;
 pub mod threads;
 pub mod tls;

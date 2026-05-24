@@ -801,6 +801,92 @@ fn assert_jsonrpc_error<'a>(v: &'a Value, context: &str) -> &'a Value {
         .unwrap_or_else(|| panic!("{context}: expected JSON-RPC error, got: {v}"))
 }
 
+#[tokio::test]
+async fn json_rpc_terminal_pty_lifecycle() {
+    let _env_lock = json_rpc_e2e_env_lock();
+    let tmp = tempdir().expect("tempdir");
+    let home = tmp.path();
+    let openhuman_home = home.join(".openhuman");
+
+    let _home_guard = EnvVarGuard::set_to_path("HOME", home);
+    let _workspace_guard = EnvVarGuard::unset("OPENHUMAN_WORKSPACE");
+    let _backend_url_guard = EnvVarGuard::unset("BACKEND_URL");
+    let _vite_backend_guard = EnvVarGuard::unset("VITE_BACKEND_URL");
+
+    let (mock_addr, mock_join) = serve_on_ephemeral(mock_upstream_router()).await;
+    let mock_origin = format!("http://{}", mock_addr);
+    write_min_config(&openhuman_home, &mock_origin);
+
+    let (rpc_addr, rpc_join) = serve_on_ephemeral(build_core_http_router(false)).await;
+    let rpc_base = format!("http://{rpc_addr}");
+
+    let start = post_json_rpc(
+        &rpc_base,
+        3101,
+        "openhuman.terminal_start_session",
+        json!({
+            "kind": "local",
+            "command": "echo openhuman-pty-e2e",
+            "rows": 24,
+            "cols": 80,
+            "approved": true,
+            "actor": "e2e"
+        }),
+    )
+    .await;
+    let start_outer = assert_no_jsonrpc_error(&start, "terminal_start_session");
+    let started = start_outer.get("result").unwrap_or(start_outer);
+    let session_id = started
+        .get("session_id")
+        .and_then(Value::as_str)
+        .expect("session_id");
+    assert_eq!(started.get("kind"), Some(&json!("local")));
+
+    let mut seen_output = String::new();
+    let mut after_seq = 0_u64;
+    for _ in 0..20 {
+        let poll = post_json_rpc(
+            &rpc_base,
+            3102,
+            "openhuman.terminal_poll_output",
+            json!({ "session_id": session_id, "after_seq": after_seq, "max_chunks": 32 }),
+        )
+        .await;
+        let body = assert_no_jsonrpc_error(&poll, "terminal_poll_output");
+        after_seq = body
+            .get("next_seq")
+            .and_then(Value::as_u64)
+            .unwrap_or(after_seq);
+        if let Some(chunks) = body.get("chunks").and_then(Value::as_array) {
+            for chunk in chunks {
+                if let Some(data) = chunk.get("data").and_then(Value::as_str) {
+                    seen_output.push_str(data);
+                }
+            }
+        }
+        if seen_output.contains("openhuman-pty-e2e") {
+            break;
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    assert!(
+        seen_output.contains("openhuman-pty-e2e"),
+        "expected PTY output, got: {seen_output:?}"
+    );
+
+    let close = post_json_rpc(
+        &rpc_base,
+        3103,
+        "openhuman.terminal_close",
+        json!({ "session_id": session_id }),
+    )
+    .await;
+    assert_no_jsonrpc_error(&close, "terminal_close");
+
+    rpc_join.abort();
+    mock_join.abort();
+}
+
 fn extract_string_outcome(result: &Value) -> String {
     if let Some(s) = result.as_str() {
         return s.to_string();

@@ -24,6 +24,7 @@ export type SettingsRoute =
   | 'memory-debug'
   | 'recovery-phrase'
   | 'webhooks-debug'
+  | 'terminal'
   | 'agent-chat'
   | 'screen-awareness-debug'
   | 'autocomplete-debug'
@@ -102,6 +103,7 @@ export const useSettingsNavigation = (): SettingsNavigationHook => {
     if (path.includes('/settings/memory-data')) return 'memory-data';
     if (path.includes('/settings/memory-debug')) return 'memory-debug';
     if (path.includes('/settings/webhooks-debug')) return 'webhooks-debug';
+    if (path.includes('/settings/terminal')) return 'terminal';
     if (path.includes('/settings/webhooks-triggers')) return 'webhooks-triggers';
     if (path.includes('/settings/composio-triggers')) return 'composio-triggers';
     if (path.includes('/settings/composio-routing')) return 'composio-routing';
@@ -215,6 +217,7 @@ export const useSettingsNavigation = (): SettingsNavigationHook => {
       case 'voice-debug':
       case 'local-model-debug':
       case 'webhooks-debug':
+      case 'terminal':
       case 'memory-data':
       case 'memory-debug':
       case 'intelligence':

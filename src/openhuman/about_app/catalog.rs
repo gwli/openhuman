@@ -1097,6 +1097,17 @@ const CAPABILITIES: &[Capability] = &[
         privacy: None,
     },
     Capability {
+        id: "settings.interactive_terminal",
+        name: "Interactive Terminal",
+        domain: "settings",
+        category: CapabilityCategory::Settings,
+        description:
+            "Open a local or SSH-backed PTY terminal session that the user can see, type into, and close.",
+        how_to: "Settings > Developer Options > Terminal",
+        status: CapabilityStatus::Beta,
+        privacy: LOCAL_RAW,
+    },
+    Capability {
         id: "settings.manage_service",
         name: "Manage Desktop Service",
         domain: "settings",

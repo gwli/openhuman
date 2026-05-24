@@ -5108,6 +5108,7 @@ dependencies = [
  "keyring",
  "landlock",
  "lettre",
+ "libc",
  "log",
  "mail-parser",
  "matrix-sdk",
