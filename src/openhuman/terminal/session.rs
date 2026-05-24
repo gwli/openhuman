@@ -24,6 +24,8 @@ use std::time::{Duration, Instant};
 
 #[cfg(unix)]
 use std::os::fd::{AsRawFd, FromRawFd};
+#[cfg(unix)]
+use std::os::unix::process::CommandExt;
 
 const DEFAULT_ROWS: u16 = 24;
 const DEFAULT_COLS: u16 = 80;
@@ -275,7 +277,7 @@ impl TerminalSessionManager {
             kind,
             status: Mutex::new(TerminalStatus::Running),
             child: Mutex::new(Some(child)),
-            master: Mutex::new(pair.master),
+            master: Mutex::new(master),
             writer: Mutex::new(Some(writer)),
             buffer: Arc::new(Mutex::new(VecDeque::new())),
             next_seq: Arc::new(AtomicU64::new(1)),
@@ -679,10 +681,22 @@ fn spawn_pty_process(command: &mut Command, rows: u16, cols: u16) -> Result<Spaw
     let stdin = slave.try_clone().context("clone PTY slave for stdin")?;
     let stdout = slave.try_clone().context("clone PTY slave for stdout")?;
     let stderr = slave.try_clone().context("clone PTY slave for stderr")?;
+    let controlling_fd = slave.as_raw_fd();
     command
         .stdin(Stdio::from(stdin))
         .stdout(Stdio::from(stdout))
         .stderr(Stdio::from(stderr));
+    unsafe {
+        command.pre_exec(move || {
+            if libc::setsid() < 0 {
+                return Err(std::io::Error::last_os_error());
+            }
+            if libc::ioctl(controlling_fd, libc::TIOCSCTTY, 0) < 0 {
+                return Err(std::io::Error::last_os_error());
+            }
+            Ok(())
+        });
+    }
     let child = command.spawn().context("spawn PTY command")?;
     drop(slave);
 
